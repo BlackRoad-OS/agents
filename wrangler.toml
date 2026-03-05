@@ -1,0 +1,65 @@
+# BlackRoad OS Agent Tasks Worker
+# Copyright (c) 2024-2026 BlackRoad OS, Inc. All Rights Reserved.
+
+name = "blackroad-agent-tasks"
+main = "src/workers/agent-tasks.ts"
+compatibility_date = "2024-12-01"
+node_compat = true
+
+[build]
+command = "npm run build:worker"
+
+# Production environment
+[env.production]
+name = "blackroad-agent-tasks"
+routes = [
+  { pattern = "agents-api.blackroad.io/*", zone_name = "blackroad.io" }
+]
+
+[env.production.vars]
+ENVIRONMENT = "production"
+
+[[env.production.kv_namespaces]]
+binding = "AGENT_KV"
+id = "CONFIGURE_KV_NAMESPACE_ID"
+
+[[env.production.r2_buckets]]
+binding = "AGENT_BUCKET"
+bucket_name = "blackroad-agent-storage"
+
+[[env.production.queues.producers]]
+binding = "AGENT_QUEUE"
+queue = "blackroad-agent-tasks"
+
+[[env.production.queues.consumers]]
+queue = "blackroad-agent-tasks"
+max_batch_size = 10
+max_retries = 3
+dead_letter_queue = "blackroad-agent-tasks-dlq"
+
+[env.production.triggers]
+crons = ["0 */6 * * *"]
+
+# Staging environment
+[env.staging]
+name = "blackroad-agent-tasks-staging"
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+
+[[env.staging.kv_namespaces]]
+binding = "AGENT_KV"
+id = "CONFIGURE_STAGING_KV_NAMESPACE_ID"
+
+[[env.staging.r2_buckets]]
+binding = "AGENT_BUCKET"
+bucket_name = "blackroad-agent-storage-staging"
+
+[[env.staging.queues.producers]]
+binding = "AGENT_QUEUE"
+queue = "blackroad-agent-tasks-staging"
+
+[[env.staging.queues.consumers]]
+queue = "blackroad-agent-tasks-staging"
+max_batch_size = 5
+max_retries = 3

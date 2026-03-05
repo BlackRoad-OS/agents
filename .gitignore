@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+.wrangler/
+.vercel/
+.env
+.env.local
+.env.production
+*.log
+.DS_Store
+*.tsbuildinfo
